@@ -1,0 +1,127 @@
+{
+  "project_info": {
+    "project_number": "461905155118",
+    "firebase_url": "https://sams-planner-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "sams-planner",
+    "storage_bucket": "sams-planner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461905155118:android:29a36368327370b7493bbf",
+        "android_client_info": {
+          "package_name": "com.example.sams_planner3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRhVR0yeLYBui99HeKrBFloKuJfL6fQow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461905155118:android:49e3502df8474db4493bbf",
+        "android_client_info": {
+          "package_name": "com.example.sams_planner4"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRhVR0yeLYBui99HeKrBFloKuJfL6fQow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461905155118:android:13c6c4af062b6e90493bbf",
+        "android_client_info": {
+          "package_name": "com.example.sams_planner5"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRhVR0yeLYBui99HeKrBFloKuJfL6fQow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461905155118:android:5604306405d27fa9493bbf",
+        "android_client_info": {
+          "package_name": "com.example.sams_planner6"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRhVR0yeLYBui99HeKrBFloKuJfL6fQow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461905155118-5srds6fc1c6rp8civk36ealjls1iml93.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
