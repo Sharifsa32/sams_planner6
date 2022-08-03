@@ -43,12 +43,43 @@ class _AddDataState extends State<AddData> {
     super.dispose();
   }
 
-  addTask(String task){
+  addTask(String task) {
     FirebaseFirestore.instance
         .collection("task_details")
-        .add({"description": task, "is_done": false});
+        .add({"description": task, "is_done": false, "is_priority": false});
     Navigator.pop(context, 'OK');
   }
+
+  taskStyle(bool isDone, bool isPriority) {
+    if (isDone & isPriority) {
+      return const TextStyle(
+          decoration: TextDecoration.lineThrough, fontWeight: FontWeight.bold);
+    } else if (isDone & !isPriority) {
+      return const TextStyle(decoration: TextDecoration.lineThrough);
+    } else if (!isDone & isPriority) {
+      return const TextStyle(fontWeight: FontWeight.bold);
+    } else {
+      const TextStyle();
+    }
+  }
+
+  actionTask(dynamic id, bool isIt, String toDo) {
+    var X = FirebaseFirestore.instance
+        .collection("task_details")
+        .doc(id);
+    switch(toDo){
+      case "prioritize":
+        X.update({"is_priority": !isIt});
+        break;
+      case "archive":
+        X.update({"is_archived": !isIt});
+        break;
+      case "delete":
+        X.delete();
+    }
+
+  }
+
   //void crossTask(){}
 
   @override
@@ -72,20 +103,43 @@ class _AddDataState extends State<AddData> {
                   Map<String, dynamic> data =
                       document.data()! as Map<String, dynamic>;
                   return ListTile(
-                    title: Text(
-                      data['description'],
-                      style: (data['is_done'])
-                          ? const TextStyle(
-                              decoration: TextDecoration.lineThrough)
-                          : const TextStyle(),
-                    ),
+                    title: Text(data['description'],
+                        style: taskStyle(data["is_done"], data["is_priority"])),
                     onTap: () => FirebaseFirestore.instance
                         .collection("task_details")
                         .doc(document.id)
                         .update({"is_done": !data['is_done']}),
-                    //.doc(data['description']).update({"is_done": true}),
-                    //            },,
-                    //subtitle: Text("$data['is_done']"),
+                    onLongPress: () {
+                      showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          actions: <Widget>[
+                            Column(
+                              children: [
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        actionTask(document.id, data["is_priority"], "prioritize");
+                                        Navigator.pop(context, 'Cancel');
+                                      },
+                                      child: const Text("Prioritize")),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      actionTask(document.id, data["is_archived"], "archive");
+                                      Navigator.pop(context, 'Cancel');
+                                    },
+                                    child: const Text("Archive")),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      actionTask(document.id, data["is_archived"], "delete");
+                                      Navigator.pop(context, 'Cancel');
+                                    },
+                                    child: const Text("Delete")),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 })
                 .toList()
@@ -117,8 +171,9 @@ class _AddDataState extends State<AddData> {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: (){
-                    addTask(_controller.text.toString());                  },
+                  onPressed: () {
+                    addTask(_controller.text.toString());
+                  },
                   child: const Text('OK'),
                 ),
               ],
