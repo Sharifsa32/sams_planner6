@@ -26,10 +26,29 @@ class AddData extends StatefulWidget {
 class _AddDataState extends State<AddData> {
   bool isChecked = false;
   String title = "Sam's Planner - Daily";
+  late TextEditingController _controller;
 
   final Stream<QuerySnapshot> _usersStream =
-  FirebaseFirestore.instance.collection('task_details').snapshots();
+      FirebaseFirestore.instance.collection('task_details').snapshots();
 
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  addTask(String task){
+    FirebaseFirestore.instance
+        .collection("task_details")
+        .add({"description": task, "is_done": false});
+    Navigator.pop(context, 'OK');
+  }
   //void crossTask(){}
 
   @override
@@ -50,24 +69,30 @@ class _AddDataState extends State<AddData> {
           return ListView(
             children: snapshot.data!.docs
                 .map((DocumentSnapshot document) {
-              Map<String, dynamic> data =
-              document.data()! as Map<String, dynamic>;
-              return ListTile(
-                  title: Text(data['description'], style: (data['is_done']) ?
-                  const TextStyle(decoration: TextDecoration.lineThrough)
-                      : const TextStyle(),),
-                  onTap: () => FirebaseFirestore.instance.collection("task_details").doc(document.id).update({"is_done": !data['is_done']}),
-                      //.doc(data['description']).update({"is_done": true}),
-                //            },,
-                //subtitle: Text("$data['is_done']"),
-              );
-            })
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+                  return ListTile(
+                    title: Text(
+                      data['description'],
+                      style: (data['is_done'])
+                          ? const TextStyle(
+                              decoration: TextDecoration.lineThrough)
+                          : const TextStyle(),
+                    ),
+                    onTap: () => FirebaseFirestore.instance
+                        .collection("task_details")
+                        .doc(document.id)
+                        .update({"is_done": !data['is_done']}),
+                    //.doc(data['description']).update({"is_done": true}),
+                    //            },,
+                    //subtitle: Text("$data['is_done']"),
+                  );
+                })
                 .toList()
                 .cast(),
           );
         },
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add your onPressed code here!
@@ -75,14 +100,25 @@ class _AddDataState extends State<AddData> {
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Add New Task'),
-              content: const Text('Description :'),
+              content: Column(
+                children: [
+                  TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Task',
+                    ),
+                  )
+                ],
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.pop(context, 'Cancel'),
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context, 'OK'),
+                  onPressed: (){
+                    addTask(_controller.text.toString());                  },
                   child: const Text('OK'),
                 ),
               ],
@@ -92,7 +128,6 @@ class _AddDataState extends State<AddData> {
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add),
       ),
-
     );
   }
 }
