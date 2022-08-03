@@ -29,7 +29,7 @@ class _AddDataState extends State<AddData> {
   late TextEditingController _controller;
 
   final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('task_details').snapshots();
+      FirebaseFirestore.instance.collection('task_details').where("is_archived", isEqualTo: false).snapshots();
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class _AddDataState extends State<AddData> {
   addTask(String task) {
     FirebaseFirestore.instance
         .collection("task_details")
-        .add({"description": task, "is_done": false, "is_priority": false});
+        .add({"description": task, "is_done": false, "is_priority": false, "is_archived": false, });
     Navigator.pop(context, 'OK');
   }
 
@@ -77,6 +77,8 @@ class _AddDataState extends State<AddData> {
       case "delete":
         X.delete();
     }
+
+    Navigator.pop(context, 'Cancel');
 
   }
 
@@ -119,19 +121,16 @@ class _AddDataState extends State<AddData> {
                                   ElevatedButton(
                                       onPressed: () {
                                         actionTask(document.id, data["is_priority"], "prioritize");
-                                        Navigator.pop(context, 'Cancel');
                                       },
                                       child: const Text("Prioritize")),
                                 ElevatedButton(
                                     onPressed: () {
                                       actionTask(document.id, data["is_archived"], "archive");
-                                      Navigator.pop(context, 'Cancel');
                                     },
                                     child: const Text("Archive")),
                                 ElevatedButton(
                                     onPressed: () {
-                                      actionTask(document.id, data["is_archived"], "delete");
-                                      Navigator.pop(context, 'Cancel');
+                                      actionTask(document.id, data["is_priority"], "delete");
                                     },
                                     child: const Text("Delete")),
                               ],
