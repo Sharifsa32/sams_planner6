@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Firebase',
+      title: "Sam's Planner",
       home: AddData(),
     );
   }
@@ -24,7 +24,7 @@ class AddData extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text("geeksforgeeks"),
+        title: const Text("Sam's Planner"),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('task_details').snapshots(),
@@ -37,8 +37,8 @@ class AddData extends StatelessWidget {
 
           return ListView(
             children: snapshot.data!.docs.map((document) {
-              return Container(
-                child: Center(child: Text(document['description'])),
+              return ListTile(
+                title: Center(child: Text(document['description'])),
               );
             }).toList(),
           );
