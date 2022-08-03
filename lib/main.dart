@@ -30,6 +30,8 @@ class _AddDataState extends State<AddData> {
   final Stream<QuerySnapshot> _usersStream =
   FirebaseFirestore.instance.collection('task_details').snapshots();
 
+  //void crossTask(){}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,10 +53,12 @@ class _AddDataState extends State<AddData> {
               Map<String, dynamic> data =
               document.data()! as Map<String, dynamic>;
               return ListTile(
-                  title: Text(data['description'], style: (!data['is_done']) ?
+                  title: Text(data['description'], style: (data['is_done']) ?
                   const TextStyle(decoration: TextDecoration.lineThrough)
                       : const TextStyle(),),
-                  //onTap:,
+                  onTap: () => FirebaseFirestore.instance.collection("task_details").doc(document.id).update({"is_done": !data['is_done']}),
+                      //.doc(data['description']).update({"is_done": true}),
+                //            },,
                 //subtitle: Text("$data['is_done']"),
               );
             })
