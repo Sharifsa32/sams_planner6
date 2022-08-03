@@ -19,45 +19,47 @@ class MyApp extends StatelessWidget {
 }
 
 class AddData extends StatefulWidget {
-
   @override
   State<AddData> createState() => _AddDataState();
 }
 
-class _AddDataState  extends State<AddData> {
+class _AddDataState extends State<AddData> {
   bool isChecked = false;
+  String title = "Sam's Planner - Daily";
+
+  final Stream<QuerySnapshot> _usersStream =
+      FirebaseFirestore.instance.collection('task_details').snapshots();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text("Sam's Planner - Daily"),
+        title: Text(title),
       ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('task_details').snapshots(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _usersStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
+          if(!snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-
           return ListView(
-            children: snapshot.data!.docs.map((document) {
+            children: snapshot.data!.docs
+                .map((DocumentSnapshot document) {
+              Map<String, dynamic> data =
+              document.data()! as Map<String, dynamic>;
               return ListTile(
-                title: Center(child: Text(document['description'],
-                  style : (isChecked)? const TextStyle(decoration: TextDecoration.lineThrough):const TextStyle(),
-                )),
-                leading: Checkbox(checkColor: Colors.white,
-                  value: isChecked,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isChecked = value!;
-                    });
-                  },),
+                title: Text(data['description']),
+                onTap: ()=> setState(() {
+                  title = "$data['description']";
+                }),
+                //subtitle: Text("$data['is_done']"),
               );
-            }).toList(),
+            })
+                .toList()
+                .cast(),
           );
         },
       ),
