@@ -28,7 +28,7 @@ class _AddDataState extends State<AddData> {
   String title = "Sam's Planner - Daily";
 
   final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('task_details').snapshots();
+  FirebaseFirestore.instance.collection('task_details').snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class _AddDataState extends State<AddData> {
       body: StreamBuilder<QuerySnapshot>(
         stream: _usersStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if(!snapshot.hasData) {
+          if (!snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -51,10 +51,10 @@ class _AddDataState extends State<AddData> {
               Map<String, dynamic> data =
               document.data()! as Map<String, dynamic>;
               return ListTile(
-                title: Text(data['description']),
-                onTap: ()=> setState(() {
-                  title = "$data['description']";
-                }),
+                  title: Text(data['description'], style: (!data['is_done']) ?
+                  const TextStyle(decoration: TextDecoration.lineThrough)
+                      : const TextStyle(),),
+                  //onTap:,
                 //subtitle: Text("$data['is_done']"),
               );
             })
