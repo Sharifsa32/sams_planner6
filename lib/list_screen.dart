@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:sams_planner6/archive_weekly.dart';
 import 'package:sams_planner6/main.dart';
 import 'package:sams_planner6/string_extension.dart';
 import 'later.dart';
@@ -43,13 +44,13 @@ class _ListScreenState extends State<ListScreen> {
     });
   }
 
-  taskStyle(bool isDone, bool isPriority) {
-    if (isDone & isPriority) {
+  taskStyle(dynamic data) {
+    if (data["is_done"] & data["is_priority"]) {
       return const TextStyle(
           decoration: TextDecoration.lineThrough, fontWeight: FontWeight.bold);
-    } else if (isDone & !isPriority) {
+    } else if (data["is_done"] & !data["is_priority"]) {
       return const TextStyle(decoration: TextDecoration.lineThrough);
-    } else if (!isDone & isPriority) {
+    } else if (!data["is_done"] & data["is_priority"]) {
       return const TextStyle(fontWeight: FontWeight.bold);
     } else {
       const TextStyle();
@@ -69,6 +70,9 @@ class _ListScreenState extends State<ListScreen> {
       case "prioritize":
         X.update({"is_priority": !isIt});
         break;
+      case "done":
+        X.update({"is_done": !isIt});
+        break;
       case "archive":
         X.update({"is_archived": !isIt});
         break;
@@ -78,7 +82,7 @@ class _ListScreenState extends State<ListScreen> {
       case "delete":
         X.delete();
     }
-    Navigator.of(context, rootNavigator: true).pop();
+    Navigator.pop(context);
   }
 
   //function to build float button if in main screen
@@ -150,13 +154,16 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  //action to toggle priority label for the options menu button
-  priorityLabel(id, isPriority) {
-    return (isPriority) ? "Unprioritize" : "Prioritize";
-  }
-
   //function to generate the widgets for the options menu buttons
   optionsMenuWidget(id, isIt, word) {
+    String label;
+    if (word == "prioritize"){
+      label = isIt? "Unprioritize" : "Prioritize";
+    } else if (word == "archive"){
+      label = isIt? "Unarchive" : "Archive";
+    } else {
+      label = word;
+    }
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: SizedBox(
@@ -175,7 +182,7 @@ class _ListScreenState extends State<ListScreen> {
               },
             ),
           ),
-          child: Text((word == "prioritize") ? priorityLabel(id, isIt) : word),
+          child: Text(label),
         ),
       ),
     );
@@ -203,7 +210,7 @@ class _ListScreenState extends State<ListScreen> {
         actions: <Widget>[
           navIcon(Icons.home, const MyApp()),
           navIcon(Icons.hourglass_bottom, const LaterClass()),
-          navIcon(Icons.done, const LaterClass()),
+          navIcon(Icons.done, const ArchiveWeekly()),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -230,21 +237,18 @@ class _ListScreenState extends State<ListScreen> {
                     child: ListTile(
                       title: Text(
                         data['description'],
-                        style: TextStyle(
-                            fontWeight: data['is_priority']
-                                ? FontWeight.bold
-                                : FontWeight.normal),
+                        style: taskStyle(data),
                       ),
                       onTap: () {
                         // add crossing function
-                        actionTask(document.id, data["is_archived"], "archive");
+                        actionTask(document.id, data["is_done"], "done");
                       },
                       onLongPress: () {
                         showDialog<String>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
                             content: SizedBox(
-                              height: 170,
+                              height: 230,
                               width: 100,
                               child: Column(
                                 children: [
@@ -252,6 +256,8 @@ class _ListScreenState extends State<ListScreen> {
                                       data["is_priority"], "prioritize"),
                                   optionsMenuWidget(
                                       document.id, data["is_later"], "later"),
+                                  optionsMenuWidget(
+                                      document.id, data["is_archived"], "archive"),
                                   optionsMenuWidget(
                                       document.id, true, "delete"),
                                 ],
