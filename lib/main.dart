@@ -7,13 +7,15 @@ import 'package:sams_planner6/later.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: "Sam's Planner",
       home: AddData(),
     );
@@ -21,12 +23,13 @@ class MyApp extends StatelessWidget {
 }
 
 class AddData extends StatefulWidget {
+  const AddData({Key? key}) : super(key: key);
+
   @override
   State<AddData> createState() => _AddDataState();
 }
 
 class _AddDataState extends State<AddData> {
-  bool isChecked = false;
   String title = "Sam's Planner - Daily";
   late TextEditingController _controller;
 
@@ -94,7 +97,38 @@ class _AddDataState extends State<AddData> {
       case "delete":
         X.delete();
     }
-    //Navigator.pop(context, 'Cancel');
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  //action to toggle priority label for the options menu button
+  priorityLabel(id, isPriority) {
+    return (isPriority) ? "Unprioritize" : "Prioritize";
+  }
+
+
+  //function to generate the widgets for the options menu buttons
+  optionsMenuWidget(id, isIt, word) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SizedBox(
+        width: 170,
+        child: ElevatedButton(
+          onPressed: () {
+            actionTask(id, isIt, word);
+          },
+          style: ButtonStyle(backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) {
+                return Colors.teal;
+              }
+              return Colors.deepPurple; // Use the component's default.
+            },
+          ),
+          ),
+          child: Text((word == "prioritize")? priorityLabel(id, isIt) : word ),
+        ),
+      ),
+    );
   }
 
   //void crossTask(){}
@@ -139,50 +173,48 @@ class _AddDataState extends State<AddData> {
                 .map((DocumentSnapshot document) {
                   Map<String, dynamic> data =
                       document.data()! as Map<String, dynamic>;
-                  return ListTile(
-                    title: Text(data['description'],
-                        style: taskStyle(data["is_done"], data["is_priority"])),
-                    onTap: () {
-                      // add crossing function
-                      crossTask(document.id, data["is_done"]);
-                    },
-                    onLongPress: () {
-                      showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          actions: <Widget>[
-                            Column(
-                              children: [
-                                ElevatedButton(
-                                    onPressed: () {
-                                      actionTask(document.id,
-                                          data["is_priority"], "prioritize");
-                                    },
-                                    child: const Text("Prioritize")),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      actionTask(document.id,
-                                          data["is_archived"], "archive");
-                                    },
-                                    child: const Text("Archive")),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      actionTask(document.id,
-                                          data["is_later"], "later");
-                                    },
-                                    child: const Text("later")),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      actionTask(document.id,
-                                          data["is_priority"], "delete");
-                                    },
-                                    child: const Text("Delete")),
-                              ],
+                  return DecoratedBox(
+                    position: DecorationPosition.foreground,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom:
+                        BorderSide(width: 0.2, color: Color(0xFF000000)),
+                      ),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        data['description'],
+                        style: TextStyle(
+                            fontWeight: data['is_priority']
+                                ? FontWeight.bold
+                                : FontWeight.normal),
+                      ),
+                      onTap: () {
+                        // add crossing function
+                        actionTask(document.id, data["is_archived"], "archive");
+                      },
+                      onLongPress: () {
+                        showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            content: SizedBox(
+                              height: 170,
+                              width: 100,
+                              child: Column(
+                                children: [
+                                  optionsMenuWidget(
+                                      document.id, data["is_priority"], "prioritize"),
+                                  optionsMenuWidget(
+                                      document.id, data["is_later"], "later"),
+                                  optionsMenuWidget(
+                                      document.id, true, "delete"),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   );
                 })
                 .toList()
