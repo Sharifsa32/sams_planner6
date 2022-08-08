@@ -69,20 +69,24 @@ class _ListScreenState extends State<ListScreen> {
     switch (toDo) {
       case "prioritize":
         X.update({"is_priority": !isIt});
+        Navigator.pop(context);
         break;
       case "done":
         X.update({"is_done": !isIt});
         break;
       case "archive":
         X.update({"is_archived": !isIt});
+        Navigator.pop(context);
         break;
       case "later":
         X.update({"is_later": !isIt});
+        Navigator.pop(context);
         break;
       case "delete":
         X.delete();
+        Navigator.pop(context);
+        break;
     }
-    Navigator.pop(context);
   }
 
   //function to build float button if in main screen
