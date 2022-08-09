@@ -17,6 +17,8 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   String title = "Sam's Planner - ";
   late TextEditingController _controller;
+  var db = FirebaseFirestore.instance.collection("task_details");
+
 
   @override
   void initState() {
@@ -63,7 +65,8 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   actionTask(dynamic id, bool isIt, String toDo, String description) {
-    var X = FirebaseFirestore.instance.collection("task_details").doc(id);
+    //var db = FirebaseFirestore.instance.collection("task_details").doc(id);
+    var X = db.doc(id);
     switch (toDo) {
       case "Prioritize":
         X.update({"is_priority": !isIt});
@@ -77,8 +80,8 @@ class _ListScreenState extends State<ListScreen> {
         Navigator.of(context, rootNavigator: true).pop();
         break;
       case "Edit":
-        X.update({"is_done": !isIt});
         Navigator.of(context, rootNavigator: true).pop();
+        editTaskForm(description, id);
         break;
       case "Later":
         X.update({"is_later": !isIt});
@@ -89,7 +92,6 @@ class _ListScreenState extends State<ListScreen> {
         Navigator.of(context, rootNavigator: true).pop();
         break;
     }
-    //Navigator.pop(context);
   }
 
 
@@ -141,6 +143,51 @@ class _ListScreenState extends State<ListScreen> {
       );
     }
   }
+
+  // edit task functions
+  void editTask(dynamic id, String controllerText){
+    dynamic X = db.doc(id);
+    X.update({"description" : controllerText});
+  }
+
+  dynamic editTaskForm(String description, dynamic id){
+    _controller.text = description;
+        return showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            actions: <Widget>[
+              Column(
+                children: [
+                  TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Task',
+                    ),
+                  )
+                ],
+              ),
+              TextButton(
+                onPressed: () {
+                  if (_controller.text.toString().trim() != "") {
+                    editTask(id, _controller.text.toString().trim().capitalize());
+                  }
+                  _controller = TextEditingController();
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _controller = TextEditingController();
+                  Navigator.pop(context, 'Cancel');
+                },
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        );}
 
   //function to choose what data to display
   dynamic chooseData(pageTitle) {
