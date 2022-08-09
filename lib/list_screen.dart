@@ -18,8 +18,6 @@ class _ListScreenState extends State<ListScreen> {
   String title = "Sam's Planner - ";
   late TextEditingController _controller;
 
-  //final Stream<QuerySnapshot> _usersStream;
-
   @override
   void initState() {
     super.initState();
@@ -64,30 +62,36 @@ class _ListScreenState extends State<ListScreen> {
         .update({"is_done": !isDone, "time_completed": DateTime.now()});
   }
 
-  actionTask(dynamic id, bool isIt, String toDo) {
+  actionTask(dynamic id, bool isIt, String toDo, String description) {
     var X = FirebaseFirestore.instance.collection("task_details").doc(id);
     switch (toDo) {
-      case "prioritize":
+      case "Prioritize":
         X.update({"is_priority": !isIt});
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         break;
       case "done":
         X.update({"is_done": !isIt});
         break;
-      case "archive":
+      case "Archive":
         X.update({"is_archived": !isIt});
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         break;
-      case "later":
+      case "Edit":
+        X.update({"is_done": !isIt});
+        Navigator.of(context, rootNavigator: true).pop();
+        break;
+      case "Later":
         X.update({"is_later": !isIt});
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         break;
       case "delete":
         X.delete();
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         break;
     }
+    //Navigator.pop(context);
   }
+
 
   //function to build float button if in main screen
   dynamic buildFloatButton(pageTitle) {
@@ -160,11 +164,11 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   //function to generate the widgets for the options menu buttons
-  optionsMenuWidget(id, isIt, word) {
+  optionsMenuWidget(id, isIt, word, description) {
     String label;
-    if (word == "prioritize"){
+    if (word == "Prioritize"){
       label = isIt? "Unprioritize" : "Prioritize";
-    } else if (word == "archive"){
+    } else if (word == "Archive"){
       label = isIt? "Unarchive" : "Archive";
     } else {
       label = word;
@@ -175,7 +179,7 @@ class _ListScreenState extends State<ListScreen> {
         width: 170,
         child: ElevatedButton(
           onPressed: () {
-            actionTask(id, isIt, word);
+            actionTask(id, isIt, word, description);
           },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -246,25 +250,28 @@ class _ListScreenState extends State<ListScreen> {
                       ),
                       onTap: () {
                         // add crossing function
-                        actionTask(document.id, data["is_done"], "done");
+                        //crossTask(document.id, data["is_done"]);
+                        actionTask(document.id, data["is_done"], "done", "");
                       },
                       onLongPress: () {
                         showDialog<String>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
-                            content: SizedBox(
-                              height: 230,
-                              width: 100,
+                            content: SingleChildScrollView(
+                              //height: 230,
+                              //width: 100,
                               child: Column(
                                 children: [
                                   optionsMenuWidget(document.id,
-                                      data["is_priority"], "prioritize"),
+                                      data["is_priority"], "Prioritize", ""),
                                   optionsMenuWidget(
-                                      document.id, data["is_later"], "later"),
+                                      document.id, data["is_later"], "Later", ""),
                                   optionsMenuWidget(
-                                      document.id, data["is_archived"], "archive"),
+                                      document.id, data["is_archived"], "Archive", ""),
                                   optionsMenuWidget(
-                                      document.id, true, "delete"),
+                                      document.id, true, "delete", ""),
+                                  optionsMenuWidget(
+                                      document.id, data["is_done"], "Edit", data['description']),
                                 ],
                               ),
                             ),
