@@ -87,7 +87,7 @@ class _ListScreenState extends State<ListScreen> {
         X.update({"is_later": !isIt});
         Navigator.of(context, rootNavigator: true).pop();
         break;
-      case "delete":
+      case "Delete":
         X.delete();
         Navigator.of(context, rootNavigator: true).pop();
         break;
@@ -316,7 +316,7 @@ class _ListScreenState extends State<ListScreen> {
                                   optionsMenuWidget(
                                       document.id, data["is_archived"], "Archive", ""),
                                   optionsMenuWidget(
-                                      document.id, true, "delete", ""),
+                                      document.id, true, "Delete", ""),
                                   optionsMenuWidget(
                                       document.id, data["is_done"], "Edit", data['description']),
                                 ],
