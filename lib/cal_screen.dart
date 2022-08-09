@@ -2,23 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sams_planner6/archive_weekly.dart';
 import 'package:sams_planner6/main.dart';
-import 'package:sams_planner6/month_screen.dart';
 import 'package:sams_planner6/string_extension.dart';
 import 'later.dart';
 
-class ListScreen extends StatefulWidget {
+class CalScreen extends StatefulWidget {
   final String pageTitle;
 
-  const ListScreen(this.pageTitle, {Key? key}) : super(key: key);
+  const CalScreen(this.pageTitle, {Key? key}) : super(key: key);
 
   @override
-  State<ListScreen> createState() => _ListScreenState();
+  State<CalScreen> createState() => _CalScreenState();
 }
 
-class _ListScreenState extends State<ListScreen> {
+class _CalScreenState extends State<CalScreen> {
   String title = "SP - ";
   late TextEditingController _controller;
-  var db = FirebaseFirestore.instance.collection("task_details");
+  var db = FirebaseFirestore.instance.collection("projects");
 
 
   @override
@@ -34,7 +33,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   addTask(String task) {
-    FirebaseFirestore.instance.collection("task_details").add({
+    FirebaseFirestore.instance.collection("projects").add({
       "description": task,
       "is_done": false,
       "is_priority": false,
@@ -42,6 +41,7 @@ class _ListScreenState extends State<ListScreen> {
       "time_created": DateTime.now(),
       "time_completed": DateTime.now(),
       "is_later": false,
+      "tasks" : [],
     });
   }
 
@@ -60,13 +60,12 @@ class _ListScreenState extends State<ListScreen> {
 
   crossTask(dynamic id, bool isDone) {
     FirebaseFirestore.instance
-        .collection("task_details")
+        .collection("projects")
         .doc(id)
         .update({"is_done": !isDone, "time_completed": DateTime.now()});
   }
 
   actionTask(dynamic id, bool isIt, String toDo, String description) {
-    //var db = FirebaseFirestore.instance.collection("task_details").doc(id);
     var X = db.doc(id);
     switch (toDo) {
       case "Prioritize":
@@ -98,7 +97,7 @@ class _ListScreenState extends State<ListScreen> {
 
   //function to build float button if in main screen
   dynamic buildFloatButton(pageTitle) {
-    if (pageTitle == "Daily") {
+    if (pageTitle == "Month") {
       return FloatingActionButton(
         onPressed: () {
           // Add your onPressed code here!
@@ -113,7 +112,7 @@ class _ListScreenState extends State<ListScreen> {
                       autofocus: true,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Task',
+                        labelText: 'Project',
                       ),
                     )
                   ],
@@ -153,48 +152,48 @@ class _ListScreenState extends State<ListScreen> {
 
   dynamic editTaskForm(String description, dynamic id){
     _controller.text = description;
-        return showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            actions: <Widget>[
-              Column(
-                children: [
-                  TextField(
-                    controller: _controller,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Task',
-                    ),
-                  )
-                ],
-              ),
-              TextButton(
-                onPressed: () {
-                  if (_controller.text.toString().trim() != "") {
-                    editTask(id, _controller.text.toString().trim().capitalize());
-                  }
-                  _controller = TextEditingController();
-                  Navigator.pop(context);
-                },
-                child: const Text('OK'),
-              ),
-              TextButton(
-                onPressed: () {
-                  _controller = TextEditingController();
-                  Navigator.pop(context, 'Cancel');
-                },
-                child: const Text('Cancel'),
-              ),
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        actions: <Widget>[
+          Column(
+            children: [
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Project',
+                ),
+              )
             ],
           ),
-        );}
+          TextButton(
+            onPressed: () {
+              if (_controller.text.toString().trim() != "") {
+                editTask(id, _controller.text.toString().trim().capitalize());
+              }
+              _controller = TextEditingController();
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+          TextButton(
+            onPressed: () {
+              _controller = TextEditingController();
+              Navigator.pop(context, 'Cancel');
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );}
 
   //function to choose what data to display
   dynamic chooseData(pageTitle) {
-    dynamic db = FirebaseFirestore.instance.collection('task_details');
+    dynamic db = FirebaseFirestore.instance.collection('projects');
     switch (pageTitle) {
-      case "Daily":
+      case "Month":
         return db
             .where("is_archived", isEqualTo: false)
             .where("is_later", isEqualTo: false)
@@ -231,7 +230,7 @@ class _ListScreenState extends State<ListScreen> {
           },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.pressed)) {
                   return Colors.teal;
                 }
@@ -268,7 +267,7 @@ class _ListScreenState extends State<ListScreen> {
           navIcon(Icons.home, const MyApp()),
           navIcon(Icons.hourglass_bottom, const LaterClass()),
           navIcon(Icons.done, const ArchiveWeekly()),
-          navIcon(Icons.calendar_month, const MonthClass()),
+          navIcon(Icons.calendar_month, const LaterClass()),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -282,54 +281,54 @@ class _ListScreenState extends State<ListScreen> {
           return ListView(
             children: snapshot.data!.docs
                 .map((DocumentSnapshot document) {
-                  Map<String, dynamic> data =
-                      document.data()! as Map<String, dynamic>;
-                  return DecoratedBox(
-                    position: DecorationPosition.foreground,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom:
-                            BorderSide(width: 0.2, color: Color(0xFF000000)),
-                      ),
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        data['description'],
-                        style: taskStyle(data),
-                      ),
-                      onTap: () {
-                        // add crossing function
-                        //crossTask(document.id, data["is_done"]);
-                        actionTask(document.id, data["is_done"], "done", "");
-                      },
-                      onLongPress: () {
-                        showDialog<String>(
-                          context: context,
-                          builder: (BuildContext context) => AlertDialog(
-                            content: SingleChildScrollView(
-                              //height: 230,
-                              //width: 100,
-                              child: Column(
-                                children: [
-                                  optionsMenuWidget(document.id,
-                                      data["is_priority"], "Prioritize", ""),
-                                  optionsMenuWidget(
-                                      document.id, data["is_later"], "Later", ""),
-                                  optionsMenuWidget(
-                                      document.id, data["is_archived"], "Archive", ""),
-                                  optionsMenuWidget(
-                                      document.id, true, "Delete", ""),
-                                  optionsMenuWidget(
-                                      document.id, data["is_done"], "Edit", data['description']),
-                                ],
-                              ),
-                            ),
+              Map<String, dynamic> data =
+              document.data()! as Map<String, dynamic>;
+              return DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom:
+                    BorderSide(width: 0.2, color: Color(0xFF000000)),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    data['description'],
+                    style: taskStyle(data),
+                  ),
+                  onTap: () {
+                    // add crossing function
+                    //crossTask(document.id, data["is_done"]);
+                    actionTask(document.id, data["is_done"], "done", "");
+                  },
+                  onLongPress: () {
+                    showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        content: SingleChildScrollView(
+                          //height: 230,
+                          //width: 100,
+                          child: Column(
+                            children: [
+                              optionsMenuWidget(document.id,
+                                  data["is_priority"], "Prioritize", ""),
+                              optionsMenuWidget(
+                                  document.id, data["is_later"], "Later", ""),
+                              optionsMenuWidget(
+                                  document.id, data["is_archived"], "Archive", ""),
+                              optionsMenuWidget(
+                                  document.id, true, "Delete", ""),
+                              optionsMenuWidget(
+                                  document.id, data["is_done"], "Edit", data['description']),
+                            ],
                           ),
-                        );
-                      },
-                    ),
-                  );
-                })
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            })
                 .toList()
                 .cast(),
           );
