@@ -103,6 +103,7 @@ class _ListScreenState extends State<ListScreen> {
                   children: [
                     TextField(
                       controller: _controller,
+                      autofocus: true,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Task',
