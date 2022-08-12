@@ -4,22 +4,20 @@ import 'package:sams_planner6/archive_weekly.dart';
 import 'package:sams_planner6/main.dart';
 import 'package:sams_planner6/month_screen.dart';
 import 'package:sams_planner6/string_extension.dart';
-import 'package:sams_planner6/subproject_screen.dart';
 import 'later.dart';
 
-class CalScreen extends StatefulWidget {
-  final String pageTitle;
+class WaitingScreen extends StatefulWidget {
 
-  const CalScreen(this.pageTitle, {Key? key}) : super(key: key);
+  const WaitingScreen({Key? key}) : super(key: key);
 
   @override
-  State<CalScreen> createState() => _CalScreenState();
+  State<WaitingScreen> createState() => _WaitingScreenState();
 }
 
-class _CalScreenState extends State<CalScreen> {
-  String title = "SP - ";
+class _WaitingScreenState extends State<WaitingScreen> {
+  String title = "Pending";
   late TextEditingController _controller;
-  var db = FirebaseFirestore.instance.collection("projects");
+  var db = FirebaseFirestore.instance.collection("waiting");
 
 
   @override
@@ -35,59 +33,17 @@ class _CalScreenState extends State<CalScreen> {
   }
 
   addTask(String task) {
-    FirebaseFirestore.instance.collection("projects").add({
+    FirebaseFirestore.instance.collection("waiting").add({
       "description": task,
-      "is_done": false,
-      "is_priority": false,
-      "is_archived": false,
-      "time_created": DateTime.now(),
-      "time_completed": DateTime.now(),
-      "is_later": false,
-      "tasks" : [],
     });
   }
 
-  taskStyle(dynamic data) {
-    if (data["is_done"] & data["is_priority"]) {
-      return const TextStyle(
-          decoration: TextDecoration.lineThrough, fontWeight: FontWeight.bold);
-    } else if (data["is_done"] & !data["is_priority"]) {
-      return const TextStyle(decoration: TextDecoration.lineThrough);
-    } else if (!data["is_done"] & data["is_priority"]) {
-      return const TextStyle(fontWeight: FontWeight.bold);
-    } else {
-      const TextStyle();
-    }
-  }
-
-  crossTask(dynamic id, bool isDone) {
-    FirebaseFirestore.instance
-        .collection("projects")
-        .doc(id)
-        .update({"is_done": !isDone, "time_completed": DateTime.now()});
-  }
-
-  actionTask(dynamic id, bool isIt, String toDo, String description) {
+  actionTask(dynamic id, String toDo, String description) {
     var X = db.doc(id);
     switch (toDo) {
-      case "Prioritize":
-        X.update({"is_priority": !isIt});
-        Navigator.of(context, rootNavigator: true).pop();
-        break;
-      case "done":
-        X.update({"is_done": !isIt});
-        break;
-      case "Archive":
-        X.update({"is_archived": !isIt});
-        Navigator.of(context, rootNavigator: true).pop();
-        break;
       case "Edit":
         Navigator.of(context, rootNavigator: true).pop();
         editTaskForm(description, id);
-        break;
-      case "Later":
-        X.update({"is_later": !isIt});
-        Navigator.of(context, rootNavigator: true).pop();
         break;
       case "Delete":
         X.delete();
@@ -98,8 +54,7 @@ class _CalScreenState extends State<CalScreen> {
 
 
   //function to build float button if in main screen
-  dynamic buildFloatButton(pageTitle) {
-    if (pageTitle == "Month") {
+  dynamic buildFloatButton() {
       return FloatingActionButton(
         onPressed: () {
           // Add your onPressed code here!
@@ -114,7 +69,7 @@ class _CalScreenState extends State<CalScreen> {
                       autofocus: true,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Project',
+                        labelText: 'Task',
                       ),
                     )
                   ],
@@ -143,7 +98,6 @@ class _CalScreenState extends State<CalScreen> {
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add),
       );
-    }
   }
 
   // edit task functions
@@ -165,7 +119,7 @@ class _CalScreenState extends State<CalScreen> {
                 autofocus: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Project',
+                  labelText: 'Task',
                 ),
               )
             ],
@@ -191,44 +145,15 @@ class _CalScreenState extends State<CalScreen> {
       ),
     );}
 
-  //function to choose what data to display
-  dynamic chooseData(pageTitle) {
-    dynamic db = FirebaseFirestore.instance.collection('projects');
-    switch (pageTitle) {
-      case "Month":
-        return db
-            .where("is_archived", isEqualTo: false)
-            .where("is_later", isEqualTo: false)
-            .snapshots();
-      case "Later":
-        return db
-            .where("is_archived", isEqualTo: false)
-            .where("is_later", isEqualTo: true)
-            .snapshots();
-      case "Achieved":
-        return db
-            .where("is_archived", isEqualTo: true)
-            .snapshots();
-    }
-  }
-
   //function to generate the widgets for the options menu buttons
-  optionsMenuWidget(id, isIt, word, description) {
-    String label;
-    if (word == "Prioritize"){
-      label = isIt? "Unprioritize" : "Prioritize";
-    } else if (word == "Archive"){
-      label = isIt? "Unarchive" : "Archive";
-    } else {
-      label = word;
-    }
+  optionsMenuWidget(id, word, description) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: SizedBox(
         width: 170,
         child: ElevatedButton(
           onPressed: () {
-            actionTask(id, isIt, word, description);
+            actionTask(id, word, description);
           },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -240,7 +165,7 @@ class _CalScreenState extends State<CalScreen> {
               },
             ),
           ),
-          child: Text(label),
+          child: Text(word),
         ),
       ),
     );
@@ -264,16 +189,16 @@ class _CalScreenState extends State<CalScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: Text(title + widget.pageTitle),
+        title: Text(title),
         actions: <Widget>[
           navIcon(Icons.home, const MyApp()),
-          navIcon(Icons.hourglass_bottom, const LaterClass()),
+          navIcon(Icons.watch_later_outlined, const LaterClass()),
           navIcon(Icons.done, const ArchiveWeekly()),
           navIcon(Icons.calendar_month, const MonthClass()),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: chooseData(widget.pageTitle),
+        stream: db.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -296,13 +221,11 @@ class _CalScreenState extends State<CalScreen> {
                 child: ListTile(
                   title: Text(
                     data['description'],
-                    style: taskStyle(data),
                   ),
                   onTap: () {
                     // add crossing function
                     //crossTask(document.id, data["is_done"]);
-                    //actionTask(document.id, data["is_done"], "done", "");
-                    MaterialPageRoute(builder: (context) => SubScreenClass(document.id, "Month", data['tasks']));
+                    actionTask(document.id, "done", "");
                   },
                   onLongPress: () {
                     showDialog<String>(
@@ -313,16 +236,11 @@ class _CalScreenState extends State<CalScreen> {
                           //width: 100,
                           child: Column(
                             children: [
-                              optionsMenuWidget(document.id,
-                                  data["is_priority"], "Prioritize", ""),
                               optionsMenuWidget(
-                                  document.id, data["is_later"], "Later", ""),
+                                  document.id, "Edit", data['description']),
                               optionsMenuWidget(
-                                  document.id, data["is_archived"], "Archive", ""),
-                              optionsMenuWidget(
-                                  document.id, true, "Delete", ""),
-                              optionsMenuWidget(
-                                  document.id, data["is_done"], "Edit", data['description']),
+                                  document.id, "Delete", ""),
+
                             ],
                           ),
                         ),
@@ -337,7 +255,7 @@ class _CalScreenState extends State<CalScreen> {
           );
         },
       ),
-      floatingActionButton: buildFloatButton(widget.pageTitle),
+      floatingActionButton: buildFloatButton(),
     );
   }
 }
