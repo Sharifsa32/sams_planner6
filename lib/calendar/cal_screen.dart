@@ -1,44 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sams_planner6/archive_weekly.dart';
+import 'package:sams_planner6/calendar/sub_task.dart';
 import 'package:sams_planner6/main.dart';
-import 'package:sams_planner6/month_screen.dart';
 import 'package:sams_planner6/string_extension.dart';
-import 'later.dart';
+import '../later.dart';
 
-
-//void main() async {
-  //runApp(SubScreenClass());
-//}
-
-class SubScreenClass extends StatelessWidget {
-  const SubScreenClass(this.id, this.pageTitle, this.taskList, {Key? key}) : super(key: key);
-
-  final dynamic id;
-  final dynamic taskList;
+class CalScreen extends StatefulWidget {
   final String pageTitle;
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Sam's Planner",
-      home: SubScreen(id, pageTitle, taskList),
-    );
-  }
-}
-
-class SubScreen extends StatefulWidget {
-  SubScreen(this.id, this.pageTitle, this.taskList, {Key? key}) : super(key: key);
-
-  final String pageTitle;
-  dynamic taskList;
-  dynamic id;
+  const CalScreen(this.pageTitle, {Key? key}) : super(key: key);
 
   @override
-  State<SubScreen> createState() => _SubScreenState();
+  State<CalScreen> createState() => _CalScreenState();
 }
 
-class _SubScreenState extends State<SubScreen> {
+class _CalScreenState extends State<CalScreen> {
   String title = "SP - ";
   late TextEditingController _controller;
   var db = FirebaseFirestore.instance.collection("projects");
@@ -291,7 +268,7 @@ class _SubScreenState extends State<SubScreen> {
           navIcon(Icons.home, const MyApp()),
           navIcon(Icons.hourglass_bottom, const LaterClass()),
           navIcon(Icons.done, const ArchiveWeekly()),
-          navIcon(Icons.calendar_month, const MonthClass()),
+          //navIcon(Icons.calendar_month, const MonthClass()),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -321,9 +298,10 @@ class _SubScreenState extends State<SubScreen> {
                     style: taskStyle(data),
                   ),
                   onTap: () {
-                    // add crossing function
-                    //crossTask(document.id, data["is_done"]);
-                    actionTask(document.id, data["is_done"], "done", "");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SubScreen(data['description'])),
+                    );
                   },
                   onLongPress: () {
                     showDialog<String>(

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sams_planner6/archive_weekly.dart';
 import 'package:sams_planner6/main.dart';
-import 'package:sams_planner6/month_screen.dart';
+import 'package:sams_planner6/calendar/month_screen.dart';
 import 'package:sams_planner6/string_extension.dart';
 import 'package:sams_planner6/waiting_screen.dart';
 import 'later.dart';

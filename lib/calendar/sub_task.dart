@@ -2,22 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sams_planner6/archive_weekly.dart';
 import 'package:sams_planner6/main.dart';
-import 'package:sams_planner6/month_screen.dart';
 import 'package:sams_planner6/string_extension.dart';
-import 'package:sams_planner6/subproject_screen.dart';
-import 'later.dart';
+import '../later.dart';
 
-class CalScreen extends StatefulWidget {
-  final String pageTitle;
-
-  const CalScreen(this.pageTitle, {Key? key}) : super(key: key);
+class SubScreen extends StatefulWidget {
+  final dynamic projectID;
+  SubScreen(this.projectID, {Key? key}) : super(key: key);
 
   @override
-  State<CalScreen> createState() => _CalScreenState();
+  State<SubScreen> createState() => _SubScreenState();
 }
 
-class _CalScreenState extends State<CalScreen> {
-  String title = "SP - ";
+class _SubScreenState extends State<SubScreen> {
   late TextEditingController _controller;
   var db = FirebaseFirestore.instance.collection("projects");
 
@@ -264,16 +260,16 @@ class _CalScreenState extends State<CalScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: Text(title + widget.pageTitle),
+        title: Text(widget.projectID),
         actions: <Widget>[
           navIcon(Icons.home, const MyApp()),
           navIcon(Icons.hourglass_bottom, const LaterClass()),
           navIcon(Icons.done, const ArchiveWeekly()),
-          navIcon(Icons.calendar_month, const MonthClass()),
+          //navIcon(Icons.calendar_month, const MonthClass()),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: chooseData(widget.pageTitle),
+        stream: chooseData(widget.projectID),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -299,10 +295,10 @@ class _CalScreenState extends State<CalScreen> {
                     style: taskStyle(data),
                   ),
                   onTap: () {
-                    // add crossing function
-                    //crossTask(document.id, data["is_done"]);
-                    //actionTask(document.id, data["is_done"], "done", "");
-                    MaterialPageRoute(builder: (context) => SubScreenClass(document.id, "Month", data['tasks']));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyApp()),
+                    );
                   },
                   onLongPress: () {
                     showDialog<String>(
@@ -337,7 +333,7 @@ class _CalScreenState extends State<CalScreen> {
           );
         },
       ),
-      floatingActionButton: buildFloatButton(widget.pageTitle),
+      floatingActionButton: buildFloatButton(widget.projectID),
     );
   }
 }
